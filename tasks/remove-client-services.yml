@@ -1,0 +1,16 @@
+---
+
+- name: "Recheck for remove service {{ item.key }} {{ item.value }}"
+  shell: "pmm-admin list | grep '{{ item.value }}'"
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+  register: pmm_admin_list_remove
+  changed_when: false
+
+- name: "Removing services {{ item.key }} {{ item.value }} from monitoring"
+  command: "pmm-admin remove {{ item.key }} {{ item.value }}"
+  when: >
+        ( not ansible_check_mode ) and
+        ( pmm_admin_list_add.rc == 0 )
+

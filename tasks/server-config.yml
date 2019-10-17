@@ -1,0 +1,41 @@
+---
+
+- name: 'Set variable pmm config flags'
+  set_fact:
+    pmm2_extended_client_config_flags: >
+      {%  set _pmm2_extended_client_config_flags = [] -%}
+      {%- if pmm2_add_client_config['flags'] is defined -%}
+      {%-   for _pmm2_add_client_config_flag, _pmm2_add_client_config_value in pmm2_add_client_config['flags'].items() -%}
+      {%-     if _pmm2_add_client_config_value == '' -%}
+      {{-       _pmm2_extended_client_config_flags.append('--' + _pmm2_add_client_config_flag) -}}
+      {%-     else -%}
+      {{-       _pmm2_extended_client_config_flags.append('--' + _pmm2_add_client_config_flag + '=' + _pmm2_add_client_config_value) -}}
+      {%-     endif -%}
+      {%-   endfor -%}
+      {%- endif -%}
+      {{- _pmm2_extended_client_config_flags | list }}
+
+- name: 'Set variable pmm config args'
+  set_fact:
+    pmm2_extended_client_config_args: "{{ pmm2_add_client_config['args'] | join(' ') if pmm2_add_client_config['args'] is defined else '' }}"
+
+- name: 'Set variable pmm config extended'
+  set_fact:
+    pmm2_extended_client_config: "{{ pmm2_extended_client_config_flags | join(' ') + ' ' + pmm2_extended_client_config_args }}"
+
+- name: 'Set variable pmm config'
+  set_fact:
+    pmm2_client_config: "{{ pmm2_base_client_config + ' ' + pmm2_extended_client_config }}"
+
+- name: Check if PMM2 Client is configured
+  command: pmm-admin list
+  ignore_errors: true
+  register: pmm_admin_list
+  changed_when: false
+
+- name: Configure PMM2 Client
+  command: pmm-admin config {{ pmm2_client_config }}
+  when: >
+        (not ansible_check_mode) and
+        (pmm_admin_list.stderr.find("pmm-agent is running, but not set up") != -1)
+

@@ -1,0 +1,72 @@
+---
+
+- name: Adding Linux and ProxySQL services to monitoring
+  shell: >
+         set -o pipefail ;
+         if ! pmm-admin list | grep {{ item | quote }} ; then
+         pmm-admin add {{ item | quote }} --config-file {{ pmm_client_config_file | quote }} {{ pmm_client_name | quote }} ; fi
+  args:
+    executable: /bin/bash
+  loop: "{{ pmm_client_add_services | flatten(levels=1) }}"
+  when: >
+        ("linux:metrics" in item) or
+        ("proxysql:metrics" in item)
+
+- name: Adding MySQL services to monitoring
+  shell: >
+         set -o pipefail ;
+         if ! pmm-admin list | grep {{ item | quote }} ; then
+         pmm-admin add {{ item | quote }} --host {{ pmm_client_db["mysql"]["host"] | quote }}
+         --port {{ pmm_client_db["mysql"]["port"] | quote }} --user {{ pmm_client_db["mysql"]["username"] | quote }}
+         --password {{ pmm_client_db["mysql"]["password"] | quote }}
+         --config-file {{ pmm_client_config_file | quote }} {{ pmm_client_name | quote }} ; fi
+  args:
+    executable: /bin/bash
+  loop: "{{ pmm_client_add_services | flatten(levels=1) }}"
+  when: ("mysql" in item)
+
+- name: Adding PostgreSQL services to monitoring
+  shell: >
+         set -o pipefail ;
+         if ! pmm-admin list | grep {{ item | quote }} ; then
+         pmm-admin add {{ item | quote }} --host {{ pmm_client_db["postgresql"]["host"] | quote }}
+         --port {{ pmm_client_db["postgresql"]["port"] | quote }} --user {{ pmm_client_db["postgresql"]["username"] | quote }}
+         --password {{ pmm_client_db["postgresql"]["password"] | quote }}
+         --config-file {{ pmm_client_config_file | quote }} {{ pmm_client_name | quote }} ; fi
+  args:
+    executable: /bin/bash
+  loop: "{{ pmm_client_add_services | flatten(levels=1) }}"
+  when: ("postgresql:metrics" in item)
+
+- name: Adding MongoDB services to monitoring
+  shell: >
+         set -o pipefail ;
+         if ! pmm-admin list | grep {{ item | quote }} ; then
+         pmm-admin add {{ item | quote }} --uri {{ pmm_client_db["mongodb"]["uri"] | quote }}
+         {{ '--cluster' + pmm_client_db["mongodb"]["cluster"] | quote if not "mongodb:queries" in item else '' }}
+         --config-file {{ pmm_client_config_file | quote }} {{ pmm_client_name | quote }} ; fi
+  args:
+    executable: /bin/bash
+  loop: "{{ pmm_client_add_services | flatten(levels=1) }}"
+  when: ("mongodb" in item)
+
+- name: Removing services from monitoring
+  shell: "set -o pipefail ; if pmm-admin list | grep {{ item | quote }} ; then pmm-admin remove {{ item | quote }} {{ pmm_client_name | quote }} ; fi"
+  args:
+    executable: /bin/bash
+  loop: "{{ pmm_client_remove_services | flatten(levels=1) }}"
+  when: pmm_client_remove_services
+
+- name: Start monitoring services
+  service:
+    name: "{{ pmm_service_names[item] }}"
+    state: started
+    enabled: yes
+  loop: "{{ pmm_client_start_services | flatten(levels=1) }}"
+
+- name: Stop monitoring services
+  service:
+    name: "{{ pmm_service_names[item] }}"
+    state: stopped
+    enabled: no
+  loop: "{{ pmm_client_stop_services | flatten(levels=1) }}"

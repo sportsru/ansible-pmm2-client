@@ -1,0 +1,37 @@
+---
+
+- name: Install PMM2 Client packages from official repo
+  package:
+    name: "{{ pmm2_client_pkgs }}"
+    state: present
+    update_cache: "{{ omit if ((ansible_pkg_mgr == 'dnf') and (ansible_version is version('2.7', '<'))) else 'yes' }}"
+  delay: 10
+  register: result
+  retries: 3
+  until: result is succeeded
+  when: pmm2_client_use_official_repo
+
+- name: Install PMM2 Client package from URL - Debian based distributions
+  apt:
+    deb: "{{ pmm2_client_pkg }}"
+    state: present
+  delay: 10
+  register: result
+  retries: 3
+  until: result is succeeded
+  when: >
+        (not pmm2_client_use_official_repo) and
+        (ansible_os_family == "Debian")
+
+- name: Install PMM2 Client package from URL - RedHat based distributions
+  yum:
+    name: "{{ pmm2_client_pkg }}"
+    state: present
+  delay: 10
+  register: result
+  retries: 3
+  until: result is succeeded
+  when: >
+        (not pmm2_client_use_official_repo) and
+        (ansible_os_family == "RedHat")
+

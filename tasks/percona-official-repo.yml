@@ -1,0 +1,21 @@
+---
+
+- name: Ensure Percona APT repository
+  apt:
+    deb: "{{ pmm2_client_repo }}"
+    state: present
+  delay: 10
+  register: result
+  retries: 3
+  until: result is succeeded
+  when: ansible_os_family == "Debian"
+
+- name: Ensure Percona YUM repository
+  yum:
+    name: "{{ pmm2_client_repo }}"
+    state: present
+  delay: 10
+  register: result
+  retries: 3
+  until: result is succeeded
+  when: ansible_os_family == "RedHat"

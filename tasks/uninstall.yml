@@ -1,0 +1,10 @@
+---
+
+- name: Uninstall PMM2 Client
+  package:
+    name: "{{ pmm2_client_pkgs }}"
+    state: absent
+  delay: 10
+  register: result
+  retries: 3
+  until: result is succeeded

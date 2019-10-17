@@ -1,0 +1,40 @@
+---
+
+- name: "Recheck for add service {{ item.key }}"
+  shell: "pmm-admin list | egrep -i '^{{ item.key }}'"
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+  register: pmm_admin_list_add
+  changed_when: false
+
+- name: "Set variable pmm service flags of {{ item.key }}"
+  set_fact:
+    pmm2_service_flags: >
+      {%  set _pmm2_service_flags = [] -%}
+      {%- if item.value.flags is defined -%}
+      {%-   for _pmm2_service_flag, _pmm2_service_flag_value in item.value.flags.items() -%}
+      {%-     if _pmm2_service_flag_value == '' -%}
+      {{-       _pmm2_service_flags.append('--' + _pmm2_service_flag) -}}
+      {%-     else -%}
+      {{-       _pmm2_service_flags.append('--' + _pmm2_service_flag + '=' + _pmm2_service_flag_value) -}}
+      {%-     endif -%}
+      {%-   endfor -%}
+      {%- endif -%}
+      {{- _pmm2_service_flags | list }}
+
+- name: "Set variable pmm service args of {{ item.key }}"
+  set_fact:
+    pmm2_service_args: "{{ item.value.args | join(' ') if item.value.args is defined else '' }}"
+
+- name: "Set variable pmm service full of {{ item.key }}"
+  set_fact:
+    pmm2_service_full: "{{ pmm2_service_flags | join(' ') + ' ' + pmm2_service_args }}"
+
+- name: "Adding services {{ item.key }} to monitoring"
+  command: "pmm-admin add {{ item.key }} {{ pmm2_service_full }}"
+  when: > 
+        ( not ansible_check_mode ) and
+        ( pmm_admin_list_add.rc == 1 )
+
+

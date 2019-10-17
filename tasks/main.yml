@@ -1,0 +1,42 @@
+---
+
+- name: Gather OS specific variables
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_os_family }}-{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+        - "{{ ansible_os_family }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ ansible_os_family }}-{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
+      paths:
+        - vars
+
+- include_tasks: percona-official-repo.yml
+  when: >
+        pmm2_client_install and
+        pmm2_client_use_official_repo
+
+- include_tasks: install.yml
+  when: pmm2_client_install
+
+- include_tasks: server-config.yml
+  when: >
+        pmm2_client_install and
+        pmm2_client_enabled
+
+- include_tasks: add-client-services.yml
+  loop: "{{ pmm2_client_add_services | dict2items }}"
+  when: >
+        pmm2_client_install and
+        pmm2_client_enabled
+
+- include_tasks: remove-client-services.yml
+  loop: "{{ pmm2_client_remove_services | dict2items }}"
+  when: >
+        pmm2_client_install and
+        pmm2_client_enabled
+
+- include_tasks: uninstall.yml
+  when: not pmm2_client_install
+

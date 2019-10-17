@@ -1,0 +1,116 @@
+---
+
+# General
+
+# Enable the client installation. Set to false to uninstall the PMM2 client.
+# Type: Bool
+pmm2_client_install: True
+
+# Enable the client; if set to `false` there will be just the installation.
+# Type: Bool
+pmm2_client_enabled: True
+
+# Define the PMM2 Client version
+# Type: Int
+pmm2_client_version: 2.0.1
+pmm2_client_version_revision: 5
+
+# Repository
+
+# Use the official Percona repository:
+# Type: Bool
+pmm2_client_use_official_repo: True
+
+# Define the repository version package
+# Type: Str
+pmm2_client_percona_release: latest
+
+# Server
+
+# IP address and port of the PMM2 Server
+# Type: Str
+pmm2_client_server_host: localhost
+# Type: Int
+pmm2_client_server_port: 443
+
+# Type: Str
+pmm2_client_server_auth_username: admin
+pmm2_client_server_auth_password: admin
+
+# set ca_certificate to false. Set it to true if you have have a certificate signed
+# by an CA.
+# Type: Bool
+pmm2_client_insecure_tls: False
+
+# Force to set client name on initial setup
+# Type: Bool
+pmm2_client_force_setup: False
+
+pmm2_base_client_config: "--server-url=https://{{ pmm2_client_server_auth_username | quote }}:{{ pmm2_client_server_auth_password | quote }}@{{ pmm2_client_server_host | quote }}:{{ pmm2_client_server_port | quote }} {{ '--server-insecure-tls' if pmm2_client_insecure_tls else '' }} {{ '--force' if pmm2_client_force_setup else '' }}"
+
+# Define add other settings to config
+# Type: Dict
+# pmm2_add_client_config:
+#   flags:
+#     trace: ''
+#     json: ''
+#     region: 'RU'
+#   args:
+#     - "{{ ansible_default_ipv4.address }}"
+#     - 'generic'
+#     - '{{ ansible_fqdns }}'
+#
+pmm2_add_client_config: {} # pmm-admin config --help
+
+# Define services to be added (eg: mysql, proxysql,
+# mongodb, postgresql).
+# Type: Dict
+# pmm2_client_add_services:
+#   mysql: # pmm-admin add mysql --help
+#     flags:
+#       json: ''
+#       username: root
+#       password: toor
+#       environment: production
+#     args:
+#       - "{{ ansible_fqdn }}-mysql"
+#       - 127.0.0.1:3306
+#   proxysql: # pmm-admin add proxysql --help
+#     flags:
+#       json: ''
+#       username: root
+#       password: toor
+#       environment: production
+#     args:
+#       - "{{ ansible_fqdn }}-proxysql"
+#       - 127.0.0.1:3306
+#   mongodb: # pmm-admin add mongodb --help
+#     flags:
+#       json: ''
+#       username: root
+#       password: toor
+#       environment: production
+#       query-source: none
+#     args:
+#       - "{{ ansible_fqdn }}-mongodb"
+#       - 127.0.0.1:27017
+#   postgresql: # pmm-admin add postgresql --help
+#     flags:
+#       json: ''
+#       username: postres
+#       password: toor
+#       environment: production
+#       query-source: none
+#     args:
+#       - "{{ ansible_fqdn }}-postgresql"
+#       - 127.0.0.1:5432
+pmm2_client_add_services: {}
+
+# Define services to be removed (eg: mysql, proxysql,
+# mongodb, postgresql).
+# Type: Dict
+# pmm2_client_remove_services:
+#   mysql: "{{ ansible_fqdn }}-mysql"
+#   postgresql: "{{ ansible_fqdn }}-postgesql"
+pmm2_client_remove_services: {}
+

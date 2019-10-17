@@ -1,0 +1,15 @@
+---
+# List of packages:
+# Type: List
+pmm2_client_pkgs:
+  - pmm2-client
+
+# URLs to configure Percona repositories:
+# Type: Str
+pmm2_client_repo: "https://repo.percona.com/apt/percona-release_{{ pmm2_client_percona_release }}.{{ ansible_distribution_release | lower }}_all.deb"
+
+# URLs for direct download of the Percona PMM2 Client.
+# To use a direct download please set pmm2_client_use_official_repo to false.
+# Type: Str
+pmm2_client_pkg: "https://www.percona.com/downloads/pmm2/{{ pmm2_client_version }}/binary/debian/{{ ansible_distribution_release }}/x86_64/pmm2-client_{{ pmm2_client_version }}-{{ pmm2_client_version_revision }}.{{ ansible_distribution_release }}_amd64.deb"
+
