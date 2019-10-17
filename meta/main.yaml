@@ -1,0 +1,29 @@
+---
+
+galaxy_info:
+  author: Mikhail Lonyakhin 
+  company: sports.ru
+  description: PMM 2 Client for Debian and RedHat based distributions
+  role_name: pmm2_client
+  license: MIT
+  min_ansible_version: 2.5.0
+  platforms:
+  - name: EL
+    versions:
+      - all
+  - name: Fedora
+    versions:
+      - all
+  - name: Debian
+    versions:
+      - all
+  - name: Ubuntu
+    versions:
+      - all
+  galaxy_tags:
+    - database
+    - monitoring
+    - percona
+    - pmm
+    - sytem
+dependencies: []
