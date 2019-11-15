@@ -2,7 +2,7 @@
 # List of packages:
 # Type: List
 pmm2_client_pkgs:
-  - pmm2-client
+  - pmm2-client-{{ pmm2_client_version }}-{{ pmm2_client_version_revision }}
 
 # URLs to configure Percona repositories:
 # Type: Str
